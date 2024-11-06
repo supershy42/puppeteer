@@ -1,0 +1,63 @@
+version: '3.8'
+
+services:
+  api_gateway:
+    build:
+      context: ./api_gateway
+    ports:
+      - "80:80"
+    networks:
+      - backend
+
+  user_management:
+    build:
+      context: ./user_management
+    expose:
+      - "8001"
+    networks:
+      - backend
+
+  # game:
+  #   build:
+  #     context: ./srcs/game
+  #   expose:
+  #     - "8002"
+  #   networks:
+  #     - backend
+
+  # tournament:
+  #   build:
+  #     context: ./srcs/tournament
+  #   expose:
+  #     - "8003"
+  #   networks:
+  #     - backend
+
+  # chat:
+  #   build:
+  #     context: ./srcs/chat
+  #   expose:
+  #     - "8004"
+  #   networks:
+  #     - backend
+
+  database:
+    build:
+      context: ./database  # 올바른 경로
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: myuser
+      POSTGRES_PASSWORD: mypassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  db_data:
