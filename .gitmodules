@@ -4,15 +4,12 @@
 [submodule "srcs/chat"]
 	path = srcs/chat
 	url = https://github.com/supershy42/chat.git
-[submodule "srcs/cybersecurity"]
-	path = srcs/cybersecurity
-	url = https://github.com/supershy42/cybersecurity.git
 [submodule "srcs/game"]
 	path = srcs/game
 	url = https://github.com/supershy42/game.git
-[submodule "srcs/user_management"]
-	path = srcs/user_management
-	url = https://github.com/supershy42/user_management.git
 [submodule "srcs/frontend"]
 	path = srcs/frontend
 	url = https://github.com/supershy42/frontend.git
+[submodule "srcs/user"]
+	path = srcs/user
+	url = https://github.com/supershy42/user.git

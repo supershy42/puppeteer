@@ -1,0 +1,39 @@
+#!/bin/bash
+
+COMMIT_MSG_FILE=$1
+
+# 첫 번째 줄에서 prefix 추출
+PREFIX=$(head -n 1 "$COMMIT_MSG_FILE" | awk '{print $1}')
+
+# Gitmoji 매핑
+case $PREFIX in
+    feat:)
+        EMOJI="✨"
+        ;;
+    fix:)
+        EMOJI="🐛"
+        ;;
+    docs:)
+        EMOJI="📝"
+        ;;
+    style:)
+        EMOJI="💄"
+        ;;
+    refactor:)
+        EMOJI="🔨"
+        ;;
+    test:)
+        EMOJI="🧪"
+        ;;
+    chore:)
+        EMOJI="💚"
+        ;;
+    *)
+        EMOJI=""
+        ;;
+esac
+
+# Gitmoji가 있으면 첫 번째 줄에 추가
+if [[ ! -z "$EMOJI" ]]; then
+    sed -i.bak "1s/^/$EMOJI /" "$COMMIT_MSG_FILE"
+fi
