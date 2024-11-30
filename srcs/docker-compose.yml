@@ -6,52 +6,123 @@ services:
       context: ./api_gateway
     ports:
       - "80:80"
+    depends_on:
+      - auth
+      - user
+      - game
+      - chat
+    networks:
+      - backend
+  
+  auth:
+    build:
+      context: ./auth
+    expose:
+      - "8000"
+    env_file:
+      - ./.env
     networks:
       - backend
 
-  user_management:
+  user:
     build:
-      context: ./user_management
+      context: ./user
     expose:
       - "8001"
+    env_file:
+      - ./.env
+      - ./user/.env
+    environment:
+      DATABASE_URL: ${DATABASE_USER_URL}
     networks:
       - backend
 
-  # game:
-  #   build:
-  #     context: ./srcs/game
-  #   expose:
-  #     - "8002"
-  #   networks:
-  #     - backend
-
-  # tournament:
-  #   build:
-  #     context: ./srcs/tournament
-  #   expose:
-  #     - "8003"
-  #   networks:
-  #     - backend
-
-  # chat:
-  #   build:
-  #     context: ./srcs/chat
-  #   expose:
-  #     - "8004"
-  #   networks:
-  #     - backend
-
-  database:
+  chat:
     build:
-      context: ./database  # 올바른 경로
+      context: ./chat
+    expose:
+      - "8002"
+    env_file:
+      - ./.env
     environment:
-      POSTGRES_DB: mydatabase
-      POSTGRES_USER: myuser
-      POSTGRES_PASSWORD: mypassword
-    ports:
-      - "5432:5432"
+      DATABASE_URL: ${DATABASE_CHAT_URL}
+    networks:
+      - backend
+
+  game:
+    build:
+      context: ./game
+    expose:
+      - "8003"
+    env_file:
+      - ./.env
+    environment:
+      DATABASE_URL: ${DATABASE_GAME_URL}
+    networks:
+      - backend
+  
+  database_user:
+    build:
+      context: ./database_user
+    container_name: db_user
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${DB_USER_USER}
+      POSTGRES_PASSWORD: ${DB_USER_PASSWORD}
+      POSTGRES_DB: ${DB_USER_NAME}
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_user_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  database_chat:
+    build:
+      context: ./database_chat
+    container_name: db_chat
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${DB_CHAT_USER}
+      POSTGRES_PASSWORD: ${DB_CHAT_PASSWORD}
+      POSTGRES_DB: ${DB_CHAT_NAME}
+    volumes:
+      - db_chat_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  database_game:
+    build:
+      context: ./database_game
+    container_name: db_game
+    env_file:
+      - ./.env
+    environment:
+      POSTGRES_USER: ${DB_GAME_USER}
+      POSTGRES_PASSWORD: ${DB_GAME_PASSWORD}
+      POSTGRES_DB: ${DB_GAME_NAME}
+    volumes:
+      - db_game_data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+  redis_events:
+    image: redis:latest
+    container_name: redis_events
+    expose:
+      - "6380"
+    volumes:
+      - redis_events_data:/data
+    networks:
+      - backend
+
+  redis_websockets:
+    image: redis:latest
+    container_name: redis_websockets
+    expose:
+      - "6381"
+    volumes:
+      - redis_websockets_data:/data
     networks:
       - backend
 
@@ -60,4 +131,27 @@ networks:
     driver: bridge
 
 volumes:
-  db_data:
+  db_chat_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./database_chat
+      o: bind
+  db_game_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./database_game
+      o: bind
+  db_user_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./database_user
+      o: bind
+  redis_data:
+      driver: local
+      driver_opts:
+        type: none
+        device: ./redis
+        o: bind
