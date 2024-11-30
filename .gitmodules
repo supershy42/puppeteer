@@ -13,3 +13,6 @@
 [submodule "srcs/user"]
 	path = srcs/user
 	url = https://github.com/supershy42/user.git
+[submodule "srcs/auth"]
+	path = srcs/auth
+	url = https://github.com/supershy42/auth.git
