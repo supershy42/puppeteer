@@ -1,18 +1,24 @@
 [submodule "srcs/api_gateway"]
 	path = srcs/api_gateway
 	url = https://github.com/supershy42/api_gateway.git
+	branch = main
 [submodule "srcs/chat"]
 	path = srcs/chat
 	url = https://github.com/supershy42/chat.git
+	branch = main
 [submodule "srcs/game"]
 	path = srcs/game
 	url = https://github.com/supershy42/game.git
+	branch = main
 [submodule "srcs/frontend"]
 	path = srcs/frontend
 	url = https://github.com/supershy42/frontend.git
+	branch = main
 [submodule "srcs/user"]
 	path = srcs/user
 	url = https://github.com/supershy42/user.git
+	branch = main
 [submodule "srcs/auth"]
 	path = srcs/auth
 	url = https://github.com/supershy42/auth.git
+	branch = main
