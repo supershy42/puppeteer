@@ -109,8 +109,6 @@ services:
   redis_events:
     image: redis:latest
     container_name: redis_events
-    expose:
-      - "6380"
     volumes:
       - redis_events_data:/data
     networks:
@@ -119,8 +117,6 @@ services:
   redis_websockets:
     image: redis:latest
     container_name: redis_websockets
-    expose:
-      - "6381"
     volumes:
       - redis_websockets_data:/data
     networks:
@@ -149,9 +145,15 @@ volumes:
       type: none
       device: ./database_user
       o: bind
-  redis_data:
-      driver: local
-      driver_opts:
-        type: none
-        device: ./redis
-        o: bind
+  redis_events_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./redis_events
+      o: bind
+  redis_websockets_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ./redis_websockets
+      o: bind
