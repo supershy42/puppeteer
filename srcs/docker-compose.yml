@@ -67,9 +67,7 @@ services:
     env_file:
       - ./frontend/.env
       - ./.env
-    networks:
-      - backend
-  
+
   # database_user:
   #   build:
   #     context: ./database_user
