@@ -1,11 +1,13 @@
 services:
   api_gateway:
+    container_name: api_gateway
+    init: true
     build:
       context: ./api_gateway
     ports:
       - "80:80"
     depends_on:
-      # - auth
+      - auth
       - user
       # - game
       # - chat
@@ -13,53 +15,51 @@ services:
       - backend
   
   auth:
+    container_name: auth
+    init: true
     build:
       context: ./auth
-    expose:
-      - "8000"
     env_file:
       - ./.env
     networks:
       - backend
 
   user:
+    container_name: user
+    init: true
     build:
       context: ./user
-    expose:
-      - "8001"
     env_file:
       - ./.env
       - ./user/.env
-    environment:
-      DATABASE_URL: ${DATABASE_USER_URL}
+    depends_on:
+      - database_user
     networks:
       - backend
 
   # chat:
-  #   build:
+  #   container_name: chat
+  # init: true#   
+  # build:
   #     context: ./chat
-  #   expose:
-  #     - "8002"
   #   env_file:
   #     - ./.env
-  #   environment:
-  #     DATABASE_URL: ${DATABASE_CHAT_URL}
   #   networks:
   #     - backend
 
   # game:
-  #   build:
+  #   container_name: game
+  # init: true
+  # build:
   #     context: ./game
-  #   expose:
-  #     - "8003"
   #   env_file:
   #     - ./.env
-  #   environment:
-  #     DATABASE_URL: ${DATABASE_GAME_URL}
   #   networks:
   #     - backend
   
   frontend:
+    container_name: frontend
+    init: true
     build:
       context: ./frontend
     ports:
@@ -68,26 +68,31 @@ services:
       - ./frontend/.env
       - ./.env
 
-  # database_user:
-  #   build:
-  #     context: ./database_user
-  #   container_name: db_user
-  #   env_file:
-  #     - ./.env
-  #   environment:
-  #     POSTGRES_USER: ${DB_USER_USER}
-  #     POSTGRES_PASSWORD: ${DB_USER_PASSWORD}
-  #     POSTGRES_DB: ${DB_USER_NAME}
-  #   volumes:
-  #     - db_user_data:/var/lib/postgresql/data
-  #   networks:
-  #     - backend
+  database_user:
+    container_name: database_user
+    init: true
+    build:
+      context: ./database_user
+    env_file:
+      - ./.env
+    volumes:
+      - db_user_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h database_user -p ${POSTGRES_PORT} -U ${DB_USER_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
 
   # database_chat:
-  #   build:
+  #   container_name: database_chat
+  # init: true   
+  # build:
   #     context: ./database_chat
   #   container_name: db_chat
-  #   env_file:
+  # init: true   
+  # env_file:
   #     - ./.env
   #   environment:
   #     POSTGRES_USER: ${DB_CHAT_USER}
@@ -99,10 +104,13 @@ services:
   #     - backend
 
   # database_game:
-  #   build:
+  #   container_name: database_game
+  # init: true   
+  # build:
   #     context: ./database_game
   #   container_name: db_game
-  #   env_file:
+  # init: true   
+  # env_file:
   #     - ./.env
   #   environment:
   #     POSTGRES_USER: ${DB_GAME_USER}
@@ -113,58 +121,48 @@ services:
   #   networks:
   #     - backend
 
-  # redis_events:
-  #   image: redis:latest
-  #   container_name: redis_events
-  #   volumes:
-  #     - redis_events_data:/data
-  #   networks:
-  #     - backend
+  redis_events:
+    image: redis:latest
+    container_name: redis_events
+    init: true
+    networks:
+      - backend
 
-  # redis_websockets:
-  #   image: redis:latest
-  #   container_name: redis_websockets
-  #   volumes:
-  #     - redis_websockets_data:/data
-  #   networks:
-  #     - backend
+  redis_websockets:
+    image: redis:latest
+    container_name: redis_websockets
+    init: true
+    networks:
+      - backend
 
 networks:
   backend:
     driver: bridge
 
-# volumes:
+volumes:
   # db_chat_data:
   #   driver: local
   #   driver_opts:
   #     type: none
-  #     device: ./database_chat
+  #     device: ${DATA_PATH}/chat
   #     o: bind
 
   # db_game_data:
   #   driver: local
   #   driver_opts:
   #     type: none
-  #     device: ./database_game
+  #     device: ${DATA_PATH}/game
   #     o: bind
 
-  # db_user_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ./database_user
-  #     o: bind
+  db_user_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DATA_PATH}/user
+      o: bind
 
-  # redis_events_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ./redis_events
-  #     o: bind
+  redis_events_data:
+    driver: local
 
-  # redis_websockets_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ./redis_websockets
-  #     o: bind
+  redis_websockets_data:
+    driver: local
