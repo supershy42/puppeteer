@@ -7,4 +7,4 @@ COPY postgres.conf /etc/postgresql/postgresql.conf
 # COPY init.sql /docker-entrypoint-initdb.d/
 
 # 설정 적용
-CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
+# CMD ["postgres", "-c", "config_file=/etc/postgresql/postgresql.conf"]
