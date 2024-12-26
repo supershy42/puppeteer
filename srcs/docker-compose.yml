@@ -134,6 +134,26 @@ services:
     init: true
     networks:
       - backend
+  
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    ports:
+      - "8080:8080"  # Expose Dozzle on port 8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Access Docker logs
+    restart: unless-stopped
+    networks:
+      - backend
+
+  adminer:
+    image: adminer:latest
+    container_name: adminer
+    ports:
+      - "8081:8080"  # Expose Adminer on port 8081
+    restart: unless-stopped
+    networks:
+      - backend
 
 networks:
   backend:
