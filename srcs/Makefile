@@ -1,7 +1,7 @@
 # Configuration
 DOCKER_COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
-DATA_PATH := /var/lib/supershy/data
-ENV_FILE := srcs/.env
+DATA_PATH="$(shell pwd)/data"
+ENV_FILE="$(shell pwd)/.env"
 
 # Docker Compose targets
 all: dir
@@ -18,15 +18,17 @@ re: clean
 
 # Directory and environment setup
 dir:
-	@bash init_project.sh
+	@chmod +x init_project.sh
+	@bash ./init_project.sh
 
 clean: down
-	@docker system prune --all --force
+	# @docker system prune --all --force
 
 fclean: clean
 	@docker system prune --all --force --volumes
 	@docker network prune --force
 	@docker volume prune --force
 	@sudo rm -rf $(DATA_PATH)/*
+	@sudo rm -rf $(ENV_FILE).bak
 
 .PHONY: all build down re clean fclean dir
