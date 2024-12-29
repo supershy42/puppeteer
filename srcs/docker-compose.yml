@@ -6,11 +6,13 @@ services:
       context: ./api_gateway
     ports:
       - "80:80"
+    env_file:
+      - ./.env
     depends_on:
       - auth
       - user
-      # - game
-      # - chat
+      - game
+      - chat
     networks:
       - backend
   
@@ -37,25 +39,31 @@ services:
     networks:
       - backend
 
-  # chat:
-  #   container_name: chat
-  # init: true#   
-  # build:
-  #     context: ./chat
-  #   env_file:
-  #     - ./.env
-  #   networks:
-  #     - backend
+  chat:
+    container_name: chat
+    init: true
+    build:
+        context: ./chat
+    env_file:
+      - ./.env
+      - ./chat/.env
+    depends_on:
+    - database_chat
+    networks:
+      - backend
 
-  # game:
-  #   container_name: game
-  # init: true
-  # build:
-  #     context: ./game
-  #   env_file:
-  #     - ./.env
-  #   networks:
-  #     - backend
+  game:
+    container_name: game
+    init: true
+    build:
+      context: ./game
+    env_file:
+      - ./.env
+      - ./game/.env
+    depends_on:
+    - database_game
+    networks:
+      - backend
   
   frontend:
     container_name: frontend
@@ -65,8 +73,8 @@ services:
     ports:
       - "3000:3000"  # 포트 설정
     env_file:
-      - ./frontend/.env
       - ./.env
+      - ./frontend/.env
 
   database_user:
     container_name: database_user
@@ -75,6 +83,7 @@ services:
       context: ./database_user
     env_file:
       - ./.env
+      - ./user/.env
     volumes:
       - db_user_data:/var/lib/postgresql/data
     healthcheck:
@@ -85,41 +94,41 @@ services:
     networks:
       - backend
 
-  # database_chat:
-  #   container_name: database_chat
-  # init: true   
-  # build:
-  #     context: ./database_chat
-  #   container_name: db_chat
-  # init: true   
-  # env_file:
-  #     - ./.env
-  #   environment:
-  #     POSTGRES_USER: ${DB_CHAT_USER}
-  #     POSTGRES_PASSWORD: ${DB_CHAT_PASSWORD}
-  #     POSTGRES_DB: ${DB_CHAT_NAME}
-  #   volumes:
-  #     - db_chat_data:/var/lib/postgresql/data
-  #   networks:
-  #     - backend
-
-  # database_game:
-  #   container_name: database_game
-  # init: true   
-  # build:
-  #     context: ./database_game
-  #   container_name: db_game
-  # init: true   
-  # env_file:
-  #     - ./.env
-  #   environment:
-  #     POSTGRES_USER: ${DB_GAME_USER}
-  #     POSTGRES_PASSWORD: ${DB_GAME_PASSWORD}
-  #     POSTGRES_DB: ${DB_GAME_NAME}
-  #   volumes:
-  #     - db_game_data:/var/lib/postgresql/data
-  #   networks:
-  #     - backend
+  database_chat:
+    container_name: database_chat
+    init: true
+    build:
+      context: ./database_chat
+    env_file:
+      - ./.env
+      - ./chat/.env
+    volumes:
+      - db_chat_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h database_chat -p ${POSTGRES_PORT} -U ${DB_CHAT_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
+  
+  database_game:
+    container_name: database_game
+    init: true
+    build:
+      context: ./database_game
+    env_file:
+      - ./.env
+      - ./game/.env
+    volumes:
+      - db_game_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h database_game -p ${POSTGRES_PORT} -U ${DB_GAME_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
 
   redis_events:
     image: redis:latest
@@ -160,19 +169,19 @@ networks:
     driver: bridge
 
 volumes:
-  # db_chat_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ${DATA_PATH}/chat
-  #     o: bind
+  db_chat_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DATA_PATH}/chat
+      o: bind
 
-  # db_game_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ${DATA_PATH}/game
-  #     o: bind
+  db_game_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: ${DATA_PATH}/game
+      o: bind
 
   db_user_data:
     driver: local
