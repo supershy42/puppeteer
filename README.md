@@ -1,4 +1,71 @@
-# Welcome to your organization's demo respository
-This code repository (or "repo") is designed to demonstrate the best GitHub has to offer with the least amount of noise.
+# Supershy42
+![image](https://github.com/user-attachments/assets/e88c1f1b-01e2-4da2-86ad-ba575257bbb6)
 
-The repo includes an `index.html` file (so it can render a web page), two GitHub Actions workflows, and a CSS stylesheet dependency.
+## Overview
+Supershy42는 온라인에서 친구와 채팅 및 핑퐁 게임을 할 수 있는 웹 애플리케이션입니다. 
+
+사용자는 로그인하여 친구를 추가하고 프로필을 조회하며 1대1 채팅을 할 수 있습니다. 
+
+사용자는 게임방을 생성하여 다른 참가자를 기다리거나 친구를 초대하여 게임을 진행할 수 있습니다. 
+
+또한 토너먼트를 통해 여러 사용자가 함께 참여하는 게임 대회를 개최할 수 있습니다. 
+
+
+## 주요 기능
+- **프로필 관리**: 사용자의 프로필 정보와 게임 전적을 확인할 수 있습니다.
+
+- **친구 관리**: 다른 사용자를 검색, 친구요청, 차단할 수 있습니다.
+
+- **1대1 채팅**: 사용자는 실시간으로 친구와 채팅할 수 있습니다.
+
+- **게임방 생성 및 참가**: 사용자는 게임방을 생성하거나 기존 게임방에 참가할 수 있습니다.
+
+- **게임 토너먼트**: 사용자는 토너먼트를 개최하거나 참가하여 다른 사용자와 경쟁할 수 있습니다.
+
+아래는 제공하신 내용을 더 깔끔하고 체계적으로 다듬은 버전입니다. 가독성을 높이고, 중복된 내용을 정리하여 간결하게 표현했습니다.
+
+---
+
+## 기술 스택
+
+### 백엔드
+- **프레임워크**: Django REST Framework (v3.15.2)
+
+#### 아키텍처
+- **구조**: MSA (Microservice Architecture)
+- **주요 구성 요소**:
+  - **API Gateway**: 클라이언트 요청을 경로(path) 기반으로 적절한 서비스로 라우팅
+  - **장고 애플리케이션 서버**: 각 서비스(User, Chat, Game)별로 독립적으로 구성
+  - **데이터베이스**: PostgreSQL을 사용하며, 서비스별 독립된 데이터베이스 운영
+    - User DB: 사용자 및 친구 관련 데이터
+    - Chat DB: 채팅 관련 데이터
+    - Game DB: 게임 및 토너먼트 관련 데이터
+  - **Redis**: 캐싱 및 실시간 데이터 처리를 위한 인메모리 데이터 저장소
+- **특징**:
+  - 각 서비스는 독립적으로 배포 및 운영되며, API Gateway를 통해 통합 관리
+  - 서비스 간의 결합도를 낮추어 확장성과 유지보수성 향상
+
+#### API Gateway
+- **구성**: Nginx
+- **주요 기능**:
+  - **HTTPS 지원**: SSL/TLS를 통한 보안 통신 제공
+  - **요청 라우팅**: 클라이언트 요청을 경로(path) 기반으로 적절한 서비스로 전달
+  - **보안 강화**: Docker 네트워크를 활용하여 API Gateway만 외부 포트를 노출, 내부 서비스는 외부에서 직접 접근 불가
+
+#### 장고 애플리케이션 서비스
+- **User 서비스**: 사용자 관리 및 친구 관리 기능 제공
+- **Chat 서비스**: 실시간 채팅 기능 제공
+- **Game 서비스**: 게임 로직 및 토너먼트 관리 기능 제공
+
+#### WebSocket
+- **구성**: Django-channels 및 ASGI 서버
+- **기능**:
+  - 실시간 채팅 및 알림 제공
+  - 실시간 게임 로직 구현
+
+#### 인프라
+- **컨테이너화**: Docker
+- **오케스트레이션**: Docker-compose
+- **서비스 배포**:
+  - 각 서비스(User, Chat, Game)는 독립적인 Docker 컨테이너로 구성
+  - Docker-compose를 통해 컨테이너 간 연결 및 통합 관리
