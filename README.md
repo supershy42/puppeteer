@@ -25,7 +25,7 @@ Supershy42는 온라인에서 친구와 채팅 및 핑퐁 게임을 할 수 있�
 ---
 
 ## 아키텍처 다이어그램
-![42shy drawio (1)](https://github.com/user-attachments/assets/37c81f93-72d4-4cba-b41b-c01e56c62a33)
+![42shy drawio (2)](https://github.com/user-attachments/assets/49a4ac68-d99c-4774-9bac-62d309e66fce)
 
 
 ---
