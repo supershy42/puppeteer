@@ -4,6 +4,9 @@ services:
       context: ./api_gateway
     ports:
       - "80:80"
+      - "443:443"
+    env_file:
+      - ./.env
     depends_on:
       # - auth
       - user
@@ -11,7 +14,7 @@ services:
       # - chat
     networks:
       - backend
-  
+
   auth:
     build:
       context: ./auth
@@ -47,18 +50,19 @@ services:
   #   networks:
   #     - backend
 
-  # game:
-  #   build:
-  #     context: ./game
-  #   expose:
-  #     - "8003"
-  #   env_file:
-  #     - ./.env
-  #   environment:
-  #     DATABASE_URL: ${DATABASE_GAME_URL}
-  #   networks:
-  #     - backend
-  
+  game:
+    container_name: game
+    init: true
+    build:
+      context: ./game
+    env_file:
+      - ./.env
+      - ./game/.env
+    depends_on:
+    - database_game
+    networks:
+      - backend
+
   frontend:
     build:
       context: ./frontend
@@ -69,21 +73,24 @@ services:
       - ./.env
     networks:
       - backend
-  
-  # database_user:
-  #   build:
-  #     context: ./database_user
-  #   container_name: db_user
-  #   env_file:
-  #     - ./.env
-  #   environment:
-  #     POSTGRES_USER: ${DB_USER_USER}
-  #     POSTGRES_PASSWORD: ${DB_USER_PASSWORD}
-  #     POSTGRES_DB: ${DB_USER_NAME}
-  #   volumes:
-  #     - db_user_data:/var/lib/postgresql/data
-  #   networks:
-  #     - backend
+
+  database_game:
+    container_name: database_game
+    init: true
+    build:
+      context: ./database_game
+    env_file:
+      - ./.env
+      - ./game/.env
+    volumes:
+      - db_game_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h database_game -p ${POSTGRES_PORT} -U ${DB_GAME_USER}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - backend
 
   # database_chat:
   #   build:
@@ -100,20 +107,23 @@ services:
   #   networks:
   #     - backend
 
-  # database_game:
-  #   build:
-  #     context: ./database_game
-  #   container_name: db_game
-  #   env_file:
-  #     - ./.env
-  #   environment:
-  #     POSTGRES_USER: ${DB_GAME_USER}
-  #     POSTGRES_PASSWORD: ${DB_GAME_PASSWORD}
-  #     POSTGRES_DB: ${DB_GAME_NAME}
-  #   volumes:
-  #     - db_game_data:/var/lib/postgresql/data
-  #   networks:
-  #     - backend
+  redis_websockets:
+    image: redis:latest
+    container_name: redis_websockets
+    init: true
+    networks:
+      - backend
+
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    ports:
+      - "8080:8080"  # Expose Dozzle on port 8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock  # Access Docker logs
+    restart: unless-stopped
+    networks:
+      - backend
 
   # redis_events:
   #   image: redis:latest
@@ -135,27 +145,27 @@ networks:
   backend:
     driver: bridge
 
-# volumes:
-  # db_chat_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ./database_chat
-  #     o: bind
+volumes:
+  db_chat_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/spark2/Desktop/puppeteer/srcs/data/chat
+      o: bind
 
-  # db_game_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ./database_game
-  #     o: bind
+  db_game_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/spark2/Desktop/puppeteer/srcs/data/game
+      o: bind
 
-  # db_user_data:
-  #   driver: local
-  #   driver_opts:
-  #     type: none
-  #     device: ./database_user
-  #     o: bind
+  db_user_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /Users/spark2/Desktop/puppeteer/srcs/data/user
+      o: bind
 
   # redis_events_data:
   #   driver: local
