@@ -1,0 +1,33 @@
+# Configuration
+DOCKER_COMPOSE := $(shell if command -v docker-compose >/dev/null 2>&1; then echo "docker-compose"; else echo "docker compose"; fi)
+ENV_FILE="$(shell pwd)/.env"
+
+# Docker Compose targets
+all: dir
+	@$(DOCKER_COMPOSE) -f ./docker-compose.yml up -d
+
+build: dir
+	@$(DOCKER_COMPOSE) -f ./docker-compose.yml up -d --build
+
+down:
+	@$(DOCKER_COMPOSE) -f ./docker-compose.yml down -v
+
+re: clean
+	@$(DOCKER_COMPOSE) -f ./docker-compose.yml up -d
+
+# Directory and environment setup
+dir:
+	@chmod +x init_project.sh
+	@bash ./init_project.sh
+
+clean: down
+	docker compose down --rmi all
+#	@docker system prune --all --force
+
+fclean: clean
+	@docker system prune --all --force --volumes
+	@docker network prune --force
+	@docker volume prune --force
+	@rm -rf $(ENV_FILE).bak
+
+.PHONY: all build down re clean fclean dir
