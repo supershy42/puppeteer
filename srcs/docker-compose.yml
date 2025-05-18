@@ -90,7 +90,7 @@ services:
     volumes:
       - db_user_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h database_user -p ${POSTGRES_PORT} -U ${DB_USER_USER}"]
+      test: ["CMD-SHELL", "pg_isready -h database_user -p ${POSTGRES_PORT} -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -108,7 +108,7 @@ services:
     volumes:
       - db_chat_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h database_chat -p ${POSTGRES_PORT} -U ${DB_CHAT_USER}"]
+      test: ["CMD-SHELL", "pg_isready -h database_chat -p ${POSTGRES_PORT} -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
@@ -126,7 +126,7 @@ services:
     volumes:
       - db_game_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h database_game -p ${POSTGRES_PORT} -U ${DB_GAME_USER}"]
+      test: ["CMD-SHELL", "pg_isready -h database_game -p ${POSTGRES_PORT} -U ${POSTGRES_USER}"]
       interval: 5s
       timeout: 5s
       retries: 5
