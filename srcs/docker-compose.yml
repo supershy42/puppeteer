@@ -6,6 +6,7 @@ services:
       context: ./api_gateway
     ports:
       - "80:80"
+      - "443:443"
     env_file:
       - ./.env
     depends_on:
@@ -34,6 +35,8 @@ services:
     env_file:
       - ./.env
       - ./user/.env
+    environment:
+      - DATABASE_ENGINE=postgresql
     depends_on:
       - database_user
     networks:
@@ -47,6 +50,8 @@ services:
     env_file:
       - ./.env
       - ./chat/.env
+    environment:
+      - DATABASE_ENGINE=postgresql
     depends_on:
     - database_chat
     networks:
@@ -60,8 +65,10 @@ services:
     env_file:
       - ./.env
       - ./game/.env
+    environment:
+      - DATABASE_ENGINE=postgresql
     depends_on:
-    - database_game
+      - database_game
     networks:
       - backend
   
@@ -75,6 +82,11 @@ services:
     env_file:
       - ./.env
       - ./frontend/.env
+    environment:
+      - USER_API_URL=http://localhost/api/user
+      - CHAT_API_URL=http://localhost/api/chat
+      - FRIEND_API_URL=http://localhost/api/user/friend
+      - GAME_API_URL=http://localhost/api/game
 
   database_user:
     container_name: database_user
@@ -85,7 +97,7 @@ services:
       - ./.env
       - ./user/.env
     volumes:
-      - db_user_data:/var/lib/postgresql/data
+      - db_user_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h database_user -p ${POSTGRES_PORT} -U ${DB_USER_USER}"]
       interval: 5s
@@ -103,7 +115,7 @@ services:
       - ./.env
       - ./chat/.env
     volumes:
-      - db_chat_data:/var/lib/postgresql/data
+      - db_chat_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h database_chat -p ${POSTGRES_PORT} -U ${DB_CHAT_USER}"]
       interval: 5s
@@ -121,7 +133,7 @@ services:
       - ./.env
       - ./game/.env
     volumes:
-      - db_game_data:/var/lib/postgresql/data
+      - db_game_data:/var/lib/postgresql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -h database_game -p ${POSTGRES_PORT} -U ${DB_GAME_USER}"]
       interval: 5s

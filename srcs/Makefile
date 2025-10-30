@@ -21,7 +21,7 @@ dir:
 	@bash ./init_project.sh
 
 clean: down
-	# @docker system prune --all --force
+	@docker system prune --all --force
 
 fclean: clean
 	@docker system prune --all --force --volumes
