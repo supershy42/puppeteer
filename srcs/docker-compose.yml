@@ -179,7 +179,7 @@ services:
       - backend
 
   redis_events:
-    image: redis:7
+    image: redis:7.4-alpine
     container_name: redis_events
     init: true
     restart: unless-stopped
@@ -187,29 +187,29 @@ services:
       - backend
 
   redis_websockets:
-    image: redis:7
+    image: redis:7.4-alpine
     container_name: redis_websockets
     init: true
     restart: unless-stopped
     networks:
       - backend
-  
+
   dozzle:
-    image: amir20/dozzle:latest
+    image: amir20/dozzle:v8.12.1
     container_name: dozzle
     ports:
-      - "8080:8080"  # Expose Dozzle on port 8080
+      - "8080:8080"
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock  # Access Docker logs
+      - /var/run/docker.sock:/var/run/docker.sock
     restart: unless-stopped
     networks:
       - backend
 
   adminer:
-    image: adminer:4
+    image: adminer:4.8.1
     container_name: adminer
     ports:
-      - "8081:8080"  # Expose Adminer on port 8081
+      - "8081:8080"
     restart: unless-stopped
     networks:
       - backend
