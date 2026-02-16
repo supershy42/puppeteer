@@ -21,12 +21,18 @@ dir:
 	@bash ./init_project.sh
 
 clean: down
-	@docker system prune --all --force
+	@echo "Stopped project containers and removed project volumes."
 
 fclean: clean
-	@docker system prune --all --force --volumes
-	@docker network prune --force
-	@docker volume prune --force
-	@sudo rm -rf $(ENV_FILE).bak
+	@rm -rf $(ENV_FILE).bak 2>/dev/null || true
+	@echo "Cleaning database bind mount directories..."
+	@DATA_DIR="$$HOME/supershy/data"; \
+	if [ -d "$$DATA_DIR" ]; then \
+		echo "Removing data directories at $$DATA_DIR..."; \
+		rm -rf "$$DATA_DIR/user" "$$DATA_DIR/chat" "$$DATA_DIR/game"; \
+		echo "Database directories cleaned!"; \
+	else \
+		echo "No data directories found."; \
+	fi
 
 .PHONY: all build down re clean fclean dir

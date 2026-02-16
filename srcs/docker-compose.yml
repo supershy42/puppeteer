@@ -10,20 +10,13 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - auth
-      - user
-      - game
-      - chat
-    networks:
-      - backend
-  
-  auth:
-    container_name: auth
-    init: true
-    build:
-      context: ./auth
-    env_file:
-      - ./.env
+      user:
+        condition: service_healthy
+      game:
+        condition: service_healthy
+      chat:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - backend
 
@@ -36,9 +29,20 @@ services:
       - ./.env
       - ./user/.env
     environment:
-      - DATABASE_ENGINE=postgresql
+      - POSTGRES_HOST=database_user
+      - POSTGRES_USER=${DB_USER_USER}
+      - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
+      - POSTGRES_DB=${DB_USER_NAME}
     depends_on:
-      - database_user
+      database_user:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
     networks:
       - backend
 
@@ -46,14 +50,25 @@ services:
     container_name: chat
     init: true
     build:
-        context: ./chat
+      context: ./chat
     env_file:
       - ./.env
       - ./chat/.env
     environment:
-      - DATABASE_ENGINE=postgresql
+      - POSTGRES_HOST=database_chat
+      - POSTGRES_USER=${DB_CHAT_USER}
+      - POSTGRES_PASSWORD=${DB_CHAT_PASSWORD}
+      - POSTGRES_DB=${DB_CHAT_NAME}
     depends_on:
-    - database_chat
+      database_chat:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
     networks:
       - backend
 
@@ -66,27 +81,36 @@ services:
       - ./.env
       - ./game/.env
     environment:
-      - DATABASE_ENGINE=postgresql
+      - POSTGRES_HOST=database_game
+      - POSTGRES_USER=${DB_GAME_USER}
+      - POSTGRES_PASSWORD=${DB_GAME_PASSWORD}
+      - POSTGRES_DB=${DB_GAME_NAME}
     depends_on:
-      - database_game
+      database_game:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8000/health/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
     networks:
       - backend
-  
+
   frontend:
     container_name: frontend
     init: true
     build:
       context: ./frontend
     ports:
-      - "3000:3000"  # 포트 설정
+      - "3000:3000"
     env_file:
       - ./.env
       - ./frontend/.env
-    environment:
-      - USER_API_URL=http://localhost/api/user
-      - CHAT_API_URL=http://localhost/api/chat
-      - FRIEND_API_URL=http://localhost/api/user/friend
-      - GAME_API_URL=http://localhost/api/game
+    restart: unless-stopped
+    networks:
+      - backend
 
   database_user:
     container_name: database_user
@@ -95,14 +119,18 @@ services:
       context: ./database_user
     env_file:
       - ./.env
-      - ./user/.env
+    environment:
+      - POSTGRES_USER=${DB_USER_USER}
+      - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
+      - POSTGRES_DB=${DB_USER_NAME}
     volumes:
       - db_user_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h database_user -p ${POSTGRES_PORT} -U ${DB_USER_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER_USER} -d ${DB_USER_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
     networks:
       - backend
 
@@ -113,17 +141,21 @@ services:
       context: ./database_chat
     env_file:
       - ./.env
-      - ./chat/.env
+    environment:
+      - POSTGRES_USER=${DB_CHAT_USER}
+      - POSTGRES_PASSWORD=${DB_CHAT_PASSWORD}
+      - POSTGRES_DB=${DB_CHAT_NAME}
     volumes:
       - db_chat_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h database_chat -p ${POSTGRES_PORT} -U ${DB_CHAT_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_CHAT_USER} -d ${DB_CHAT_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
     networks:
       - backend
-  
+
   database_game:
     container_name: database_game
     init: true
@@ -131,28 +163,34 @@ services:
       context: ./database_game
     env_file:
       - ./.env
-      - ./game/.env
+    environment:
+      - POSTGRES_USER=${DB_GAME_USER}
+      - POSTGRES_PASSWORD=${DB_GAME_PASSWORD}
+      - POSTGRES_DB=${DB_GAME_NAME}
     volumes:
       - db_game_data:/var/lib/postgresql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -h database_game -p ${POSTGRES_PORT} -U ${DB_GAME_USER}"]
+      test: ["CMD-SHELL", "pg_isready -U ${DB_GAME_USER} -d ${DB_GAME_NAME}"]
       interval: 5s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
     networks:
       - backend
 
   redis_events:
-    image: redis:latest
+    image: redis:7
     container_name: redis_events
     init: true
+    restart: unless-stopped
     networks:
       - backend
 
   redis_websockets:
-    image: redis:latest
+    image: redis:7
     container_name: redis_websockets
     init: true
+    restart: unless-stopped
     networks:
       - backend
   
@@ -168,7 +206,7 @@ services:
       - backend
 
   adminer:
-    image: adminer:latest
+    image: adminer:4
     container_name: adminer
     ports:
       - "8081:8080"  # Expose Adminer on port 8081
