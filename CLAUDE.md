@@ -136,10 +136,11 @@ Nginx routes requests:
 
 ## Environment Configuration
 
-- Main config: `srcs/.env`
-- Service-specific: `srcs/{service}/.env`
+- Main config: `srcs/.env` (shared: DB credentials, Redis, JWT, inter-service URLs)
+- Service-specific: `srcs/{service}/.env` (SECRET_KEY, DEBUG)
 - Frontend env vars are read by `dotenv-webpack` at build time
-- Data persists to `~/supershy/data/{user,chat,game}/`
+- Frontend `.env` overrides main `.env` with relative URLs and WSS paths
+- Data persists to `$DATA_PATH/{user,chat,game}/` (default: `~/supershy/data/`)
 
 ## Dev Tools
 
@@ -164,4 +165,4 @@ docker logs api_gateway
 
 ## JWT Authentication
 
-Services validate JWT tokens independently using shared `JWT_SIGNING_KEY`. Game service middleware uses `verify_signature=False` for simpler token parsing (trusts API gateway).
+Services validate JWT tokens independently using shared `JWT_SIGNING_KEY` and `JWT_ALGORITHM` (both in main `srcs/.env`). Each service's Django `SECRET_KEY` (in service `.env`) is separate from the JWT signing key. Game service middleware uses `verify_signature=False` for simpler token parsing (trusts API gateway).
