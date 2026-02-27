@@ -63,12 +63,14 @@ frontend:
 
 ### 4. Created .env.example Files for Security
 
-Created template files for all services:
+Created template files for the following services:
 - ✅ `srcs/.env.example`
-- ✅ `srcs/user/.env.example`
 - ✅ `srcs/chat/.env.example`
-- ✅ `srcs/game/.env.example`
-- ✅ `srcs/frontend/.env.example`
+
+The following are **not yet created**:
+- ❌ `srcs/user/.env.example`
+- ❌ `srcs/game/.env.example`
+- ❌ `srcs/frontend/.env.example`
 
 These files show the structure without exposing real secrets, perfect for:
 - New developer onboarding
@@ -163,13 +165,10 @@ git checkout HEAD -- srcs/user/.env srcs/chat/.env srcs/game/.env srcs/frontend/
 3. `srcs/user/.env` - Removed duplicate configs
 4. `srcs/chat/.env` - Removed duplicate configs
 5. `srcs/game/.env` - Removed duplicate configs
-6. `srcs/frontend/.env` - Simplified (URLs now in main .env)
+6. `srcs/frontend/.env` - Simplified (URLs now use relative paths)
 7. `srcs/.env.example` - Created (NEW)
-8. `srcs/user/.env.example` - Created (NEW)
-9. `srcs/chat/.env.example` - Created (NEW)
-10. `srcs/game/.env.example` - Created (NEW)
-11. `srcs/frontend/.env.example` - Created (NEW)
-12. `srcs/ENV_ARCHITECTURE.md` - Created (NEW)
+8. `srcs/chat/.env.example` - Created (NEW)
+9. `srcs/ENV_ARCHITECTURE.md` - Created (NEW)
 
 ---
 

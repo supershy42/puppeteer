@@ -217,11 +217,11 @@ cd srcs
 cp .env.example .env
 # Edit .env with your settings
 
-# Copy service-specific env files
-cp user/.env.example user/.env
+# Copy service-specific env files (where templates exist)
 cp chat/.env.example chat/.env
-cp game/.env.example game/.env
-cp frontend/.env.example frontend/.env
+
+# For user, game, and frontend, create .env files manually
+# (no .env.example templates yet — refer to ENV_ARCHITECTURE.md)
 
 # Start all services
 make all
@@ -329,8 +329,10 @@ See [ENV_ARCHITECTURE.md](srcs/ENV_ARCHITECTURE.md) for detailed documentation o
 Key variables:
 - `DATA_PATH` - Host directory for persistent data
 - `DB_*_USER`, `DB_*_PASSWORD`, `DB_*_NAME` - Database credentials per service
-- `REDIS_EVENTS_URL`, `REDIS_WEBSOCKETS_URL` - Redis connection strings
-- `SECRET_KEY` - Django secret key (unique per service)
+- `JWT_SIGNING_KEY` - Shared JWT signing key (must be identical across user/chat/game)
+- `JWT_ALGORITHM` - JWT algorithm (default: HS256)
+- `REDIS_HOST`, `REDIS_PORT` - Redis connection settings
+- `SECRET_KEY` - Django secret key (unique per service, in service `.env`)
 
 ## Security Considerations
 

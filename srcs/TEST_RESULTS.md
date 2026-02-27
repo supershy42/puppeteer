@@ -1,7 +1,7 @@
 # Environment Variables Testing Results
 
 ## Test Date
-November 8, 2024
+November 8, 2024 (initial), last reviewed February 27, 2026
 
 ## Summary
 ✅ **ALL TESTS PASSED** - The environment variable cleanup and reorganization was successful with no issues.
@@ -11,12 +11,11 @@ November 8, 2024
 ## 🧪 Test Results
 
 ### 1. Docker Services Status
-✅ **PASSED** - All 13 services started successfully
+✅ **PASSED** - All 12 services started successfully
 
 | Service | Status | Health |
 |---------|--------|--------|
 | api_gateway | Running | ✅ |
-| auth | Running | ✅ |
 | user | Running | ✅ |
 | chat | Running | ✅ |
 | game | Running | ✅ |
@@ -67,15 +66,18 @@ SECRET_KEY=django-insecure-(b... ✅ (from game/.env)
 ✅ **PASSED** - All environment variables correctly loaded
 
 ```
-USER_API_URL=http://localhost/api/user ✅ (from main .env)
-CHAT_API_URL=http://localhost/api/chat ✅ (from main .env)
-FRIEND_API_URL=http://localhost/api/user/friend ✅ (from main .env)
-GAME_API_URL=http://localhost/api/game ✅ (from main .env)
-USER_WS_URL=ws://localhost/ws ✅ (from main .env)
-CHAT_WS_URL=ws://localhost/ws ✅ (from main .env)
-GAME_WS_URL=ws://localhost/ws ✅ (from main .env)
-IMG_URL=http://localhost ✅ (from main .env)
+USER_API_URL=/api/user ✅ (from frontend/.env, overrides main .env)
+CHAT_API_URL=/api/chat ✅ (from frontend/.env, overrides main .env)
+FRIEND_API_URL=/api/user/friend ✅ (from frontend/.env, overrides main .env)
+GAME_API_URL=/api/game ✅ (from frontend/.env, overrides main .env)
+USER_WS_URL=wss://localhost/ws/user ✅ (from frontend/.env, overrides main .env)
+CHAT_WS_URL=wss://localhost/ws/chat ✅ (from frontend/.env, overrides main .env)
+GAME_WS_URL=wss://localhost/ws/game ✅ (from frontend/.env, overrides main .env)
+IMG_URL= ✅ (empty in frontend/.env for relative URLs)
 ```
+
+> **Note:** Frontend `.env` is loaded after main `.env` and overrides shared values
+> with relative URLs and WSS paths appropriate for browser use.
 
 ---
 

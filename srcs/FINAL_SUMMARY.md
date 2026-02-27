@@ -44,21 +44,20 @@ frontend:
 5. ✅ `srcs/game/.env` - Cleaned up
 6. ✅ `srcs/frontend/.env` - Cleaned up
 
-### New Files Created (7)
+### New Files Created (4)
 1. ✅ `srcs/.env.example`
-2. ✅ `srcs/user/.env.example`
-3. ✅ `srcs/chat/.env.example`
-4. ✅ `srcs/game/.env.example`
-5. ✅ `srcs/frontend/.env.example`
-6. ✅ `srcs/ENV_ARCHITECTURE.md` (comprehensive guide)
-7. ✅ `srcs/TEST_RESULTS.md` (this test report)
+2. ✅ `srcs/chat/.env.example`
+3. ✅ `srcs/ENV_ARCHITECTURE.md` (comprehensive guide)
+4. ✅ `srcs/TEST_RESULTS.md` (this test report)
+
+> **Note:** `user/.env.example`, `game/.env.example`, and `frontend/.env.example` are not yet created.
 
 ---
 
 ## 🧪 Test Results: ALL PASSED ✅
 
 ### System Health
-- ✅ All 13 services running
+- ✅ All 12 services running
 - ✅ All 3 databases healthy
 - ✅ Frontend accessible (HTTP 200)
 - ✅ API Gateway routing correctly
@@ -113,15 +112,38 @@ CHAT_API_URL=http://localhost/api/chat
 ```yaml
 user:
   environment:
-    - POSTGRES_HOST=database_user  # ← Different per service
+    - POSTGRES_HOST=database_user        # ← Different per service
+    - POSTGRES_USER=${DB_USER_USER}      # ← Credentials from main .env
+    - POSTGRES_PASSWORD=${DB_USER_PASSWORD}
+    - POSTGRES_DB=${DB_USER_NAME}
 
 chat:
   environment:
-    - POSTGRES_HOST=database_chat  # ← Different per service
+    - POSTGRES_HOST=database_chat
+    - POSTGRES_USER=${DB_CHAT_USER}
+    - POSTGRES_PASSWORD=${DB_CHAT_PASSWORD}
+    - POSTGRES_DB=${DB_CHAT_NAME}
 
 game:
   environment:
-    - POSTGRES_HOST=database_game  # ← Different per service
+    - POSTGRES_HOST=database_game
+    - POSTGRES_USER=${DB_GAME_USER}
+    - POSTGRES_PASSWORD=${DB_GAME_PASSWORD}
+    - POSTGRES_DB=${DB_GAME_NAME}
+```
+
+### Frontend .env (Overrides Main .env)
+The frontend `srcs/frontend/.env` overrides the main `.env` values with relative/WSS paths:
+```bash
+# Relative API URLs (works with both HTTP and HTTPS)
+USER_API_URL=/api/user
+CHAT_API_URL=/api/chat
+GAME_API_URL=/api/game
+
+# WSS WebSocket URLs
+USER_WS_URL=wss://localhost/ws/user
+CHAT_WS_URL=wss://localhost/ws/chat
+GAME_WS_URL=wss://localhost/ws/game
 ```
 
 ### Service .env (Service-Specific Secrets)

@@ -9,14 +9,14 @@ srcs/
 ├── .env                    # Main environment file (shared across all services)
 ├── .env.example            # Template for main .env
 ├── user/.env               # User service-specific configuration
-├── user/.env.example       # Template for user service
 ├── chat/.env               # Chat service-specific configuration
 ├── chat/.env.example       # Template for chat service
 ├── game/.env               # Game service-specific configuration
-├── game/.env.example       # Template for game service
-├── frontend/.env           # Frontend service-specific configuration
-└── frontend/.env.example   # Template for frontend service
+├── frontend/.env           # Frontend service-specific configuration (overrides main .env)
+└── docker-compose.yml      # Service-specific infrastructure vars (POSTGRES_HOST, etc.)
 ```
+
+> **Note:** `.env.example` files for `user/`, `game/`, and `frontend/` are not yet created.
 
 ## 🎯 Design Principles
 
@@ -72,6 +72,7 @@ frontend:
 **Use `environment:` in `docker-compose.yml` when:**
 - Value is infrastructure-specific and varies per service
 - Example: `POSTGRES_HOST=database_user` (different for each microservice)
+- Example: `POSTGRES_USER=${DB_USER_USER}` (credentials mapped from main .env)
 
 **Use `.env` files when:**
 - Value is shared across services
@@ -79,7 +80,23 @@ frontend:
 - Value contains secrets
 - Example: API URLs, database passwords, Redis configuration
 
-### 5. Naming Conventions
+### 5. Frontend .env Override Behavior
+
+The frontend `srcs/frontend/.env` is loaded **after** the main `srcs/.env` by docker-compose, so it overrides shared values:
+
+```bash
+# Main .env defines:
+USER_API_URL=http://localhost/api/user   # Absolute URL
+USER_WS_URL=ws://localhost/ws            # WS protocol
+
+# Frontend .env overrides with:
+USER_API_URL=/api/user                   # Relative URL (works with HTTPS)
+USER_WS_URL=wss://localhost/ws/user      # WSS protocol + specific path
+```
+
+This allows backend services to use absolute URLs for inter-service communication while the frontend uses relative/secure paths appropriate for browser use.
+
+### 6. Naming Conventions
 
 ✅ **Good**:
 ```bash
@@ -111,11 +128,10 @@ When onboarding a new developer:
 ```bash
 cd srcs
 cp .env.example .env
-cp user/.env.example user/.env
 cp chat/.env.example chat/.env
-cp game/.env.example game/.env
-cp frontend/.env.example frontend/.env
 
+# For user, game, and frontend, create .env files manually
+# (no .env.example templates yet)
 # Then update all .env files with actual values
 ```
 
@@ -133,11 +149,14 @@ python -c 'from django.core.management.utils import get_random_secret_key; print
 | Database credentials | `srcs/.env` | `DB_USER_PASSWORD` |
 | Redis configuration | `srcs/.env` | `REDIS_HOST`, `REDIS_PORT` |
 | Inter-service URLs | `srcs/.env` | `USER_SERVICE_URL` |
-| Frontend API URLs | `srcs/.env` | `USER_API_URL` |
+| Frontend API URLs (base) | `srcs/.env` | `USER_API_URL` |
+| Frontend API URLs (override) | `srcs/frontend/.env` | `/api/user` (relative) |
+| JWT configuration | `srcs/.env` | `JWT_SIGNING_KEY`, `JWT_ALGORITHM` |
 | Django SECRET_KEY | `srcs/{service}/.env` | Each service has its own |
 | DEBUG flag | `srcs/{service}/.env` | Can vary per service |
 | Email config | `srcs/user/.env` | User service specific |
-| Service-specific host | `docker-compose.yml` | `POSTGRES_HOST=database_user` |
+| Service-specific DB host | `docker-compose.yml` | `POSTGRES_HOST=database_user` |
+| Service DB credentials | `docker-compose.yml` | `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB` |
 
 ## 🔄 Migration from Old Pattern
 
